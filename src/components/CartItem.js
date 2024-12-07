@@ -14,6 +14,7 @@ import { ToastContainer, toast } from "react-toastify";
 const CartItem = () => {
   const dispatch = useDispatch();
   const productData = useSelector((state) => state.bazar.productData);
+
   return (
     <div className="w-2/3 pr-10">
       <div className="w-full">
@@ -49,11 +50,6 @@ const CartItem = () => {
                         dispatch(
                           decrementQuantity({
                             _id: item._id,
-                            title: item.title,
-                            image: item.image,
-                            price: item.price,
-                            quantity: 1,
-                            description: item.description,
                           })
                         )
                       }
@@ -67,11 +63,6 @@ const CartItem = () => {
                         dispatch(
                           increamentQuantity({
                             _id: item._id,
-                            title: item.title,
-                            image: item.image,
-                            price: item.price,
-                            quantity: 1,
-                            description: item.description,
                           })
                         )
                       }

@@ -4,35 +4,61 @@ import { useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import CartItem from "../components/CartItem";
-import StripeCheckout from "react-stripe-checkout";
+import { getFirestore, doc, deleteDoc } from "firebase/firestore";
 import axios from "axios";
+import { app } from "../fireabase.config";
 
 const Cart = () => {
   const productData = useSelector((state) => state.bazar.productData);
   const userInfo = useSelector((state) => state.bazar.userInfo);
-  const [payNow, setPayNow] = useState(false);
   const [totalAmt, setTotalAmt] = useState("");
+
+  const db = getFirestore(app);
+
+  // Determine backend URL based on environment
+  const backendURL =
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:5000"
+      : "http://localhost:5000";
+
   useEffect(() => {
     let price = 0;
-    productData.map((item) => {
+    productData.forEach((item) => {
       price += item.price * item.quantity;
-      return price;
     });
     setTotalAmt(price.toFixed(2));
   }, [productData]);
 
-  const handleCheckout = () => {
-    if (userInfo) {
-      setPayNow(true);
-    } else {
+  const handleCheckout = async () => {
+    if (!userInfo) {
       toast.error("Please sign in to Checkout");
+      return;
     }
-  };
-  const payment = async (token) => {
-    await axios.post("http://localhost:8000/pay", {
-      amount: totalAmt * 100,
-      token: token,
-    });
+
+    try {
+      for (const item of productData) {
+        console.log("Attempting to delete item:", item);
+
+        // Delete product from Firestore
+        await deleteDoc(doc(db, "products", item._id.toString()));
+        console.log("Deleted item with ID:", item._id);
+
+        // Send email request to the backend
+        await axios.post(`${backendURL}/send-email`, {
+          buyerEmail: userInfo.email,
+          sellerEmail: item.sellerEmail || "default-seller@example.com",
+          productTitle: item.title,
+          productPrice: item.price,
+        });
+
+        console.log("Email sent for item:", item.title);
+      }
+
+      toast.success("Purchase successful! Emails sent.");
+    } catch (error) {
+      console.error("Error during checkout:", error.response?.data || error.message);
+      toast.error("An error occurred during checkout.");
+    }
   };
 
   return (
@@ -56,9 +82,7 @@ const Cart = () => {
               </p>
               <p className="flex items-start gap-4 text-base">
                 Shipping{" "}
-                <span>
-                  In 3 working days. Free of charge!
-                </span>
+                <span>In 3 working days. Free of charge!</span>
               </p>
             </div>
             <p className="font-titleFont font-semibold flex justify-between mt-6">
@@ -68,21 +92,8 @@ const Cart = () => {
               onClick={handleCheckout}
               className="text-base bg-black text-white w-full py-3 mt-6 hover:bg-gray-800 duration-300"
             >
-              proceed to checkout
+              Simulate Checkout
             </button>
-            {payNow && (
-              <div className="w-full mt-6 flex items-center justify-center">
-                <StripeCheckout
-                  stripeKey="pk_test_51LXpmzBcfNkwYgIPXd3qq3e2m5JY0pvhaNZG7KSCklYpVyTCVGQATRH8tTWxDSYOnRTT5gxOjRVpUZmOWUEHnTxD00uxobBHkc"
-                  name="ArtEra Online Shopping"
-                  amount={totalAmt * 100}
-                  label="Pay to Art"
-                  description={`Your Payment amount is $${totalAmt}`}
-                  token={payment}
-                  email={userInfo.email}
-                />
-              </div>
-            )}
           </div>
         </div>
       ) : (

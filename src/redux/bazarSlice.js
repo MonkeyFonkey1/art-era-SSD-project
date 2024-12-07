@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+
 const initialState = {
   productData: [],
   userInfo: null,
@@ -31,9 +32,7 @@ export const bazarSlice = createSlice({
       const item = state.productData.find(
         (item) => item._id === action.payload._id
       );
-      if (item.quantity === 1) {
-        item.quantity = 1;
-      } else {
+      if (item && item.quantity > 1) {
         item.quantity--;
       }
     },
@@ -45,14 +44,12 @@ export const bazarSlice = createSlice({
     resetCart: (state) => {
       state.productData = [];
     },
-    // =============== User Start here ==============
     addUser: (state, action) => {
       state.userInfo = action.payload;
     },
     removeUser: (state) => {
       state.userInfo = null;
     },
-    // =============== User End here ================
   },
 });
 
