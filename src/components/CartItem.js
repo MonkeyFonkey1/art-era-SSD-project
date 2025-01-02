@@ -14,17 +14,18 @@ import { ToastContainer, toast } from "react-toastify";
 const CartItem = () => {
   const dispatch = useDispatch();
   const productData = useSelector((state) => state.bazar.productData);
+  console.log(productData.map(item => item._id));
 
   return (
+    
     <div className="w-2/3 pr-10">
       <div className="w-full">
         <h2 className="font-titleFont text-2xl">shopping cart</h2>
         <div>
           <div>
             {productData.map((item) => (
-              <div
-                key={item._id}
-                className="flex items-center justify-between gap-6 mt-6"
+              <div key={item._id} 
+              className="flex items-center justify-between gap-6 mt-6"
               >
                 <div className="flex items-center gap-2">
                   <MdOutlineClose
