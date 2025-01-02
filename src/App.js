@@ -12,6 +12,9 @@ import Product from "./components/Product";
 import Home from "./Home";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
+import UploadProduct from "./pages/UploadProduct"; // Import the new UploadProduct component
+import Profile from "./pages/Profile";
+import EditProduct from "./pages/EditProduct";
 
 const Layout = () => {
   return (
@@ -46,6 +49,18 @@ const router = createBrowserRouter([
         path: "/login",
         element: <Login />,
       },
+      {
+        path: "/upload-product", // New route for uploading products
+        element: <UploadProduct />,
+      },
+      {
+        path: "/profile",
+        element: <Profile />, // Add Profile route
+      },
+      {
+        path : "/edit-product/:id",
+        element : <EditProduct />
+      }
     ],
   },
 ]);

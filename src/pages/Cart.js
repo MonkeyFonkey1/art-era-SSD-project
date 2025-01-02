@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { HiOutlineArrowLeft } from "react-icons/hi";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import CartItem from "../components/CartItem";
 import { getFirestore, doc, deleteDoc } from "firebase/firestore";
 import axios from "axios";
 import { app } from "../fireabase.config";
+import { resetCart } from "../redux/bazarSlice"; // Redux action to clear cart
 
 const Cart = () => {
   const productData = useSelector((state) => state.bazar.productData);
   const userInfo = useSelector((state) => state.bazar.userInfo);
   const [totalAmt, setTotalAmt] = useState("");
+  const dispatch = useDispatch(); // Redux dispatch function
 
   const db = getFirestore(app);
 
@@ -54,6 +56,8 @@ const Cart = () => {
         console.log("Email sent for item:", item.title);
       }
 
+
+      dispatch(resetCart()); // Reset the cart using Redux action
       toast.success("Purchase successful! Emails sent.");
     } catch (error) {
       console.error("Error during checkout:", error.response?.data || error.message);
